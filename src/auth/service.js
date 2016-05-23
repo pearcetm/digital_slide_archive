@@ -8,6 +8,8 @@ import LoginView from './login/view';
 
 var modal = Radio.channel('modal');
 var channel = Radio.channel('auth');
+var dialog = Radio.channel('dialog');
+
 var User = Model.extend({
   anonymous() {
     return !this.id;
@@ -23,6 +25,8 @@ var AuthService = Service.extend({
     channel.reply('login', this.login, this);
     channel.reply('logout', this.logout, this);
     channel.reply('register', this.register, this);
+
+    dialog.reply('login', this.login, this);
 
     return this;
   },
