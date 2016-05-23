@@ -1,0 +1,10 @@
+{
+  "extends": "semistandard",
+  "rules": {
+    "space-before-function-paren": [2, {"anonymous": "always", "named": "never"}],
+    "one-var": 0
+  },
+  "globals": {
+    "girder": true
+  }
+}

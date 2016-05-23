@@ -1,0 +1,21 @@
+.container-fluid
+  .navbar-header
+    button.navbar-toggle(data-toggle='collapse' data-target='#navbar-collapse' type='button')
+      span.sr-only Toggle navigation
+      span.icon-bar
+      span.icon-bar
+      span.icon-bar
+
+    a.navbar-brand(href='#') Girder plugin
+
+  .collapse.navbar-collapse#navbar-collapse
+    ul.nav.navbar-nav
+      each item in items
+        if item.align !== 'right'
+          li(class={active: item.active})
+            a(href="#{'#' + item.path}") #{item.name}
+    ul.nav.navbar-nav.navbar-right
+      each item in items
+        if item.align === 'right'
+          li(class={active: item.active})
+            a(href="#{'#' + item.path}") #{item.name}

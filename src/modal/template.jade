@@ -1,0 +1,11 @@
+.modal-dialog
+  - debuger;
+  .modal-content
+    .modal-header
+      button.button-dismiss.close(type='button' aria-hidden='true') &times
+      h4.modal-title
+        | #{title}
+    .modal-body
+    .modal-footer
+      button.button-dismiss.btn.btn-default(type='button') Cancel
+      button.button-submit.btn.btn-primary(type='button') OK
