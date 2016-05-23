@@ -23,7 +23,7 @@ var HeaderService = Service.extend({
     this.collection.add(model);
   },
   remove(model) {
-    model = this.collection.findWhere(model);
+    model = this.collection.filter(model);
     this.collection.remove(model);
   },
   activate(model) {

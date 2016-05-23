@@ -9,7 +9,6 @@ import Controller from './controller';
 import ModalService from './modal/service';
 import HeaderService from './header/service';
 import AuthService from './auth/service';
-import Radio from './common/radio';
 
 export default Application.extend({
   initialize(options = {}) {
@@ -33,20 +32,6 @@ export default Application.extend({
     }).start();
 
     this.authService = new AuthService().start();
-
-    Radio.request('header', 'add', {
-      name: 'login',
-      align: 'right',
-      path: '?dialog=login'
-    });
-
-    window.showModal = function () {
-      Radio.request('modal', 'show');
-    };
-
-    window.hideModal = function () {
-      Radio.request('modal', 'hide');
-    };
   },
   onStart() {
     Backbone.history.start();

@@ -7,6 +7,12 @@ import Radio from './common/radio';
 var dialog = Radio.channel('dialog');
 var channel = Radio.channel('router');
 
+dialog.reply('default', function () {
+  return new Promise((resolve) => {
+    resolve();
+  });
+});
+
 export default AppRouter.extend({
   appRoutes: {
     '': 'index',

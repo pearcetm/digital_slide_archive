@@ -45,8 +45,12 @@ export default LayoutView.extend({
       this.$el.modal('hide');
     });
   },
-  onSubmit() {
+  onSubmit(evt) {
+    evt.preventDefault();
     channel.trigger('submit', this);
+    if (this.body.currentView) {
+      this.body.currentView.triggerMethod('submit', this);
+    }
     return this.animateOut();
   },
   onDismiss() {

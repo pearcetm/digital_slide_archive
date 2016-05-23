@@ -11,8 +11,10 @@
     "backbone-route-control": "^0.1.0",
     "backbone.marionette": "^2.4.5",
     "backbone.radio": "^1.0.4",
+    "backbone.syphon": "^0.6.3",
     "bootstrap": "^3.3.6",
     "jquery": "^2.2.4",
+    "js-cookie": "^2.1.1",
     "lodash": "^3.10.1",
     "nprogress": "^0.2.0"
   },
