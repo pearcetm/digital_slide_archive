@@ -70,7 +70,7 @@ module.exports = {
   },
   context: src,
   output: {
-    path: path.resolve(out, 'dist'),
+    path: path.resolve(out, 'built'),
     filename: 'bundle.js'
   },
   module: {

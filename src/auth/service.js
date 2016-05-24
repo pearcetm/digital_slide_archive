@@ -1,10 +1,9 @@
 import _ from 'lodash';
-import Backbone from 'backbone';
-import Cookie from 'js-cookie';
+
+import girder from '../common/girder';
 
 import Service from '../common/service';
 import Radio from '../common/radio';
-import Model from '../common/model';
 
 import LoginView from './login/view';
 import RegisterView from './register/view';
@@ -13,71 +12,14 @@ var header = Radio.channel('header');
 var modal = Radio.channel('modal');
 var channel = Radio.channel('auth');
 var dialog = Radio.channel('dialog');
-var token = Cookie.get('girderToken') || null;
-var _ajax = Backbone.ajax;
-
-var User = Model.extend({
-  anonymous() {
-    return !token;
-  },
-  login(username, password) {
-    var apiRoot = Radio.request('app', 'apiRoot');
-    var auth = 'Basic ' + window.btoa(username + ':' + password);
-    return Backbone.ajax({
-      method: 'GET',
-      url: apiRoot + '/user/authentication',
-      headers: {'Girder-Authorization': auth}
-    }).then((data) => {
-      var opts = {};
-      var date = new Date(data.authToken.expires);
-      if (date.toUTCString() !== 'Invalid Date') {
-        opts.expire = date;
-      }
-      Cookie.set('girderToken', data.authToken.token, opts);
-      token = data.authToken.token;
-      this.set(data.user);
-    });
-  },
-  logout() {
-    Cookie.remove('girderToken');
-    token = null;
-    this.clear();
-  },
-  fetchUser() {
-    var apiRoot = Radio.request('app', 'apiRoot');
-    return Backbone.ajax({
-      girder: true,
-      method: 'GET',
-      url: apiRoot + '/user/me'
-    }).then((data) => {
-      if (data) {
-        this.set(data);
-      }
-    }, _.noop)
-    .then(() => {
-      this.trigger('change');
-      return this;
-    });
-  }
-});
 
 var AuthService = Service.extend({
   start() {
+    var User = girder.models.UserModel;
     this.user = new User();
-    this.loginView = new LoginView();
-    this.registerView = new RegisterView();
-
-    Backbone.ajax = function (opts) {
-      if (opts.girder && token) {
-        opts.headers = opts.header || {};
-        opts.headers['Girder-Token'] = token;
-      }
-      return _ajax.apply(this, arguments);
-    };
 
     this.listenTo(this.user, 'change', this.update);
-    this.user.fetchUser();
-    channel.reply('token', token);
+
     channel.reply('user', this.user);
     channel.reply('login', this.login, this);
     channel.reply('logout', this.logout, this);
@@ -87,35 +29,55 @@ var AuthService = Service.extend({
     dialog.reply('register', this.register, this);
     dialog.reply('logout', this.logout, this);
 
+    this.listenTo(girder.events, 'g:logout.success', this.logout);
+
+    this.listenTo(girder.events, 'g:login.success', () => {
+      this.user.set(girder.currentUser.attributes);
+      channel.trigger('login', this.user.attributes);
+    });
+
+    girder.fetchCurrentUser()
+      .then(() => {
+        channel.trigger('login', this.user.attributes);
+      });
+    this.update();
     return this;
   },
 
   login() {
-    this.logout();
+    var loginView = new LoginView();
     return modal.request('show', {
       title: 'Log in',
-      view: this.loginView
+      view: loginView
     }).then(() => {
-      var username = this.loginView.ui.username.val();
-      var password = this.loginView.ui.password.val();
-      return this.user.login(username, password);
+      if (this.user.id) {
+        this.logout();
+      }
+      var username = loginView.ui.username.val();
+      var password = loginView.ui.password.val();
+      return girder.login(username, password);
     }, _.noop);
   },
 
   logout() {
-    this.user.logout();
-    channel.trigger('logout');
+    this.user.clear();
     return new Promise((resolve) => {
       resolve();
     });
   },
 
   register() {
-    this.logout();
+    var registerView = new RegisterView();
+    var form;
     return modal.request('show', {
       title: 'Register',
-      view: this.registerView
+      view: registerView
     }).then(() => {
+      form = registerView.form;
+      channel.trigger('before:register', form);
+      return this.user.register(form);
+    }).then(() => {
+      return girder.login(form.username, form.password);
     });
   },
 
@@ -123,7 +85,7 @@ var AuthService = Service.extend({
     header.request('remove', {
       class: 'auth'
     });
-    if (this.user.anonymous()) {
+    if (!this.user.id) {
       header.request('add', {
         name: 'Register',
         align: 'right',

@@ -1,13 +1,16 @@
 import './plugins';
 
-import _ from 'lodash';
 import $ from 'jquery';
+import girder from './common/girder';
 import App from './app';
 
 import './index.styl';
 
-var app = new App({apiRoot: 'https://data.kitware.com/api/v1'});
-window.app = app;
-$(_.bind(app.start, app));
+$(() => {
+  var apiRoot = 'http://localhost:8080/api/v1';
 
-export default app;
+  girder.router.enabled(false);
+  girder.apiRoot = apiRoot;
+  var app = window.app = new App({apiRoot});
+  app.start();
+});

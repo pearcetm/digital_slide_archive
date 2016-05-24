@@ -17,6 +17,7 @@ export default Application.extend({
 
     this.$body = $(document.body);
     this.layout = new LayoutView();
+
     this.layout.render();
 
     this.router = new Router({

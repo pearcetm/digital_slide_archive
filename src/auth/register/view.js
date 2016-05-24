@@ -15,9 +15,6 @@ export default ItemView.extend({
 
   initialize() {
     this.model = new Model();
-    this.listenTo(this.model, 'change', function () {
-      console.log(this.model.attributes);
-    });
   },
 
   validate() {
