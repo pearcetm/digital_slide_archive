@@ -8,7 +8,6 @@ export default LayoutView.extend({
   template: template,
   regions: {
     header: '.app-header',
-    flashes: '.app-flashes',
     content: '.app-content',
     overlay: '.app-overlay'
   }

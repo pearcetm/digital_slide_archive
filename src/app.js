@@ -6,6 +6,8 @@ import LayoutView from './layout/view';
 import Router from './router';
 import Controller from './controller';
 
+import ToastService from './toast/service';
+import GirderService from './girder/service';
 import ModalService from './modal/service';
 import HeaderService from './header/service';
 import AuthService from './auth/service';
@@ -23,6 +25,12 @@ export default Application.extend({
     this.router = new Router({
       controller: new Controller()
     });
+
+    this.toastService = new ToastService({
+    }).start();
+
+    this.girderService = new GirderService({
+    }).start();
 
     this.headerService = new HeaderService({
       container: this.layout.header
