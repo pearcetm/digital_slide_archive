@@ -2,6 +2,7 @@
 
 import copy
 import os
+import subprocess
 import sys
 
 
@@ -22,7 +23,11 @@ def adjust_ids(user_name):  # noqa
         # make the gid a string for later use
         sock_docker_gid = str(os.stat(sockpath).st_gid)
         escapedSockPath = "'%s'" % (sockpath.replace("'", "'\\''"))
-        os.system('sudo chmod 777 %s' % escapedSockPath)
+        try:
+            subprocess.check_call('mount | grep docker.sock | grep -v nosuid', shell=True)
+            os.system('sudo chmod 777 %s' % escapedSockPath)
+        except Exception:
+            sys.stderr.write('docker.sock might not be accessible by the internal user\n')
     # Get environment UID and GIDs.  These are not required to be set.
     host_uid = os.environ.get('HOST_UID')
     host_gid = os.environ.get('HOST_GID')
@@ -148,8 +153,12 @@ def set_tmp_root():
     tmpRoot = os.environ.get('GIRDER_WORKER_TMP_ROOT', '/tmp/girder_worker')
     escapedTmpRoot = "'%s'" % (tmpRoot.replace("'", "'\\''"))
     os.system('girder-worker-config set girder_worker tmp_root %s' % escapedTmpRoot)
-    os.system('sudo mkdir -p %s' % escapedTmpRoot)
-    os.system('sudo chmod a+rwx %s' % escapedTmpRoot)
+    try:
+        # TODO: check if nosuid file system
+        os.system('sudo mkdir -p %s' % escapedTmpRoot)
+        os.system('sudo chmod a+rwx %s' % escapedTmpRoot)
+    except Exception:
+        os.system('mkdir -p -m a+rwx %s' % escapedTmpRoot)
 
 
 if __name__ == '__main__':

@@ -135,7 +135,8 @@ EXPOSE 8080
 #   HOST_MONGO=true
 # is set, mongodb is added to the /etc/hosts as mapping to the docker host ip
 # address
-CMD sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
+CMD if (mount | grep docker.sock | grep -v nosuid); then \
+    sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
     sudo -E sysctl -w net.ipv4.conf.eth0.route_localnet=1 && \
     sudo -E iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport 27017 -j DNAT --to-destination `dig +short mongodb`:27017 && \
     sudo -E iptables -t nat -A POSTROUTING -o eth0 -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE && \
@@ -150,4 +151,9 @@ CMD sudo -E python /opt/digital_slide_archive/set_environment.py ubuntu && \
     sudo -E su ubuntu -c \
     'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder mount /opt/digital_slide_archive/mount >/opt/logs/mount.log 2>&1' ; \
     sudo -E su ubuntu -c \
-    'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder serve --dev >/opt/logs/girder.log 2>&1'
+    'PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder serve --dev >/opt/logs/girder.log 2>&1' ; \
+    else \
+    PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder mount /opt/digital_slide_archive/mount >/opt/logs/mount.log 2>&1 ; \
+    PYTHONUNBUFFERED=true PATH="/home/ubuntu/.virtualenvs/girder/bin:$PATH" girder serve --dev >/opt/logs/girder.log 2>&1 ; \
+    fi
+
