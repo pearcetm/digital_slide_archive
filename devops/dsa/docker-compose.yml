@@ -1,7 +1,7 @@
 ---
 version: '3'
 services:
-  girder:
+  dsa-girder:
     image: dsarchive/dsa_common
     build: ../..
     # Instead of privileged mode, fuse can use:
@@ -79,9 +79,9 @@ services:
       # Add additional mounts here to get access to existing files on your
       # system.  Also add them to the worker container to reduce copying.
     depends_on:
-      - mongodb
-      - memcached
-      - rabbitmq
+      - dsa-mongodb
+      - dsa-memcached
+      - dsa-rabbitmq
     # The command does:
     # - Ensures that the main process runs as the DSA_USER and is part of both
     #   that group and the docker group.  This is done by:
@@ -121,7 +121,7 @@ services:
       (girder mount /fuse || true) &&
       girder serve --dev
       "'
-  mongodb:
+  dsa-mongodb:
     image: "mongo:latest"
     # Set DSA_USER to your user id (e.g., `DSA_USER=$(id -u):$(id -g)`)
     # so that database files are owned by yourself.
@@ -142,7 +142,7 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
-  memcached:
+  dsa-memcached:
     image: memcached
     command: -m 4096 --max-item-size 8M
     restart: unless-stopped
@@ -153,7 +153,7 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
-  rabbitmq:
+  dsa-rabbitmq:
     image: "rabbitmq:latest"
     restart: unless-stopped
     # Uncomment to allow access to rabbitmq from outside of the docker network
@@ -163,7 +163,7 @@ services:
       options:
         max-size: "10M"
         max-file: "5"
-  worker:
+  dsa-worker:
     image: dsarchive/dsa_common
     build: ../..
     # Set DSA_USER to a user id that is part of the docker group (e.g.,
@@ -182,7 +182,7 @@ services:
       # Add additional mounts here to get access to existing files on your
       # system if they have the same path as on the girder container.
     depends_on:
-      - rabbitmq
+      - dsa-rabbitmq
     # See the girder container for an explanation of most of this.
     # The main command is to run girder_worker
     command: bash -c '
